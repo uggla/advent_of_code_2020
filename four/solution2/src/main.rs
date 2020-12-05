@@ -99,6 +99,24 @@ fn check_hcl(value: &String) -> bool {
     false
 }
 
+fn check_ecl(value: &String) -> bool {
+    let re = Regex::new(r"^amb$|^blu$|^brn$|^gry$|^grn$|^hzl$|^oth$").unwrap();
+    if re.is_match(value) {
+        println!("ecl: {}", value);
+        return true;
+    }
+    false
+}
+
+fn check_pid(value: &String) -> bool {
+    let re = Regex::new(r"^\d{9}$").unwrap();
+    if re.is_match(value) {
+        println!("pid: {}", value);
+        return true;
+    }
+    false
+}
+
 fn check_passport(n: usize, passports: &Vec<HashMap<String, String>>) -> bool {
     match passports[n].get("byr") {
         Some(value) => {
@@ -139,6 +157,24 @@ fn check_passport(n: usize, passports: &Vec<HashMap<String, String>>) -> bool {
     match passports[n].get("hcl") {
         Some(value) => {
             if !check_hcl(value) {
+                return false;
+            }
+        }
+        None => return false,
+    };
+
+    match passports[n].get("ecl") {
+        Some(value) => {
+            if !check_ecl(value) {
+                return false;
+            }
+        }
+        None => return false,
+    };
+
+    match passports[n].get("pid") {
+        Some(value) => {
+            if !check_pid(value) {
                 return false;
             }
         }
@@ -362,5 +398,48 @@ mod tests {
         assert_eq!(check_hcl(&"#Ceb3a1".to_string()), false);
         assert_eq!(check_hcl(&"#geb3a1".to_string()), false);
         assert_eq!(check_hcl(&"#Geb3a1".to_string()), false);
+    }
+
+    #[test]
+    fn test_check_passport_ecl() {
+        let path = "input_ecl_ok";
+        let passports: Vec<HashMap<String, String>>;
+        passports = parse(path);
+        let output = check_passport(0, &passports);
+        assert_eq!(output, true);
+    }
+
+    #[test]
+    fn test_check_ecl() {
+        assert_eq!(check_ecl(&"amb".to_string()), true);
+        assert_eq!(check_ecl(&"blu".to_string()), true);
+        assert_eq!(check_ecl(&"brn".to_string()), true);
+        assert_eq!(check_ecl(&"gry".to_string()), true);
+        assert_eq!(check_ecl(&"grn".to_string()), true);
+        assert_eq!(check_ecl(&"hzl".to_string()), true);
+        assert_eq!(check_ecl(&"oth".to_string()), true);
+        assert_eq!(check_ecl(&"th".to_string()), false);
+        assert_eq!(check_ecl(&"xxth".to_string()), false);
+        assert_eq!(check_ecl(&"xxx".to_string()), false);
+    }
+
+    #[test]
+    fn test_check_passport_pid() {
+        let path = "input_pid_ok";
+        let passports: Vec<HashMap<String, String>>;
+        passports = parse(path);
+        let output = check_passport(0, &passports);
+        assert_eq!(output, true);
+    }
+
+    #[test]
+    fn test_check_pid() {
+        assert_eq!(check_pid(&"561068005".to_string()), true);
+        assert_eq!(check_pid(&"000000000".to_string()), true);
+        assert_eq!(check_pid(&"100000000".to_string()), true);
+        assert_eq!(check_pid(&"00000000".to_string()), false);
+        assert_eq!(check_pid(&"1100000000".to_string()), false);
+        assert_eq!(check_pid(&"a00000000".to_string()), false);
+        assert_eq!(check_pid(&"A00000000".to_string()), false);
     }
 }
