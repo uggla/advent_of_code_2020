@@ -90,6 +90,15 @@ fn check_hgt(value: &String) -> bool {
     false
 }
 
+fn check_hcl(value: &String) -> bool {
+    let re = Regex::new(r"^#[0-9a-f]{6}$").unwrap();
+    if re.is_match(value) {
+        println!("hcl: {}", value);
+        return true;
+    }
+    false
+}
+
 fn check_passport(n: usize, passports: &Vec<HashMap<String, String>>) -> bool {
     match passports[n].get("byr") {
         Some(value) => {
@@ -121,6 +130,15 @@ fn check_passport(n: usize, passports: &Vec<HashMap<String, String>>) -> bool {
     match passports[n].get("hgt") {
         Some(value) => {
             if !check_hgt(value) {
+                return false;
+            }
+        }
+        None => return false,
+    };
+
+    match passports[n].get("hcl") {
+        Some(value) => {
+            if !check_hcl(value) {
                 return false;
             }
         }
@@ -325,5 +343,24 @@ mod tests {
         assert_eq!(check_hgt(&"76in".to_string()), true);
         assert_eq!(check_hgt(&"58in".to_string()), false);
         assert_eq!(check_hgt(&"77in".to_string()), false);
+    }
+
+    #[test]
+    fn test_check_passport_hcl() {
+        let path = "input_hcl_ok";
+        let passports: Vec<HashMap<String, String>>;
+        passports = parse(path);
+        let output = check_passport(0, &passports);
+        assert_eq!(output, true);
+    }
+
+    #[test]
+    fn test_check_hcl() {
+        assert_eq!(check_hcl(&"#ceb3a1".to_string()), true);
+        assert_eq!(check_hcl(&"ceb3a1".to_string()), false);
+        assert_eq!(check_hcl(&"#cceb3a1".to_string()), false);
+        assert_eq!(check_hcl(&"#Ceb3a1".to_string()), false);
+        assert_eq!(check_hcl(&"#geb3a1".to_string()), false);
+        assert_eq!(check_hcl(&"#Geb3a1".to_string()), false);
     }
 }
