@@ -64,6 +64,32 @@ fn check_eyr(value: &String) -> bool {
     check_year_range(value, 2020, 2030)
 }
 
+fn check_hgt(value: &String) -> bool {
+    let re = Regex::new(r"^(\d+)(cm)$").unwrap();
+    if re.is_match(value) {
+        let max: usize = 193;
+        let min: usize = 150;
+        let caps = re.captures(value).unwrap();
+        println!("hgt: {}{}", &caps[1], &caps[2]);
+        let size: usize = caps[1].parse().unwrap();
+        if size <= max && size >= min {
+            return true;
+        }
+    }
+    let re = Regex::new(r"^(\d+)(in)$").unwrap();
+    if re.is_match(value) {
+        let max: usize = 76;
+        let min: usize = 59;
+        let caps = re.captures(value).unwrap();
+        println!("hgt: {}{}", &caps[1], &caps[2]);
+        let size: usize = caps[1].parse().unwrap();
+        if size <= max && size >= min {
+            return true;
+        }
+    }
+    false
+}
+
 fn check_passport(n: usize, passports: &Vec<HashMap<String, String>>) -> bool {
     match passports[n].get("byr") {
         Some(value) => {
@@ -86,6 +112,15 @@ fn check_passport(n: usize, passports: &Vec<HashMap<String, String>>) -> bool {
     match passports[n].get("eyr") {
         Some(value) => {
             if !check_eyr(value) {
+                return false;
+            }
+        }
+        None => return false,
+    };
+
+    match passports[n].get("hgt") {
+        Some(value) => {
+            if !check_hgt(value) {
                 return false;
             }
         }
@@ -269,5 +304,26 @@ mod tests {
         passports = parse(path);
         let output = check_passport(0, &passports);
         assert_eq!(output, false);
+    }
+
+    #[test]
+    fn test_check_passport_hgt() {
+        let path = "input_hgt_ok";
+        let passports: Vec<HashMap<String, String>>;
+        passports = parse(path);
+        let output = check_passport(0, &passports);
+        assert_eq!(output, true);
+    }
+
+    #[test]
+    fn test_check_hgt() {
+        assert_eq!(check_hgt(&"150cm".to_string()), true);
+        assert_eq!(check_hgt(&"193cm".to_string()), true);
+        assert_eq!(check_hgt(&"149cm".to_string()), false);
+        assert_eq!(check_hgt(&"194cm".to_string()), false);
+        assert_eq!(check_hgt(&"59in".to_string()), true);
+        assert_eq!(check_hgt(&"76in".to_string()), true);
+        assert_eq!(check_hgt(&"58in".to_string()), false);
+        assert_eq!(check_hgt(&"77in".to_string()), false);
     }
 }
