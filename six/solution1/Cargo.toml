@@ -1,0 +1,6 @@
+[package]
+authors = ["Uggla <uggla@free.fr>"]
+edition = "2018"
+name = "six"
+version = "0.1.0"
+[dependencies]
